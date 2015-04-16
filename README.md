@@ -4,8 +4,8 @@
 2. Enter ```make```
 <br/>
 In ***Makefile***
-Use `CFLAGS = -g ...` and `LDFLAGS = -g ...` for debug
-Use `CFLAGS = -O3 ...` and `LDFLAGS = -g ...` for release
+* Use `CFLAGS = -g ...` and `LDFLAGS = -g ...` for debug
+* Use `CFLAGS = -O3 ...` and `LDFLAGS = -g ...` for release
 
 ### SVM Python Usage
 * Learning
