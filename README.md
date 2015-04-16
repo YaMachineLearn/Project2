@@ -5,7 +5,7 @@
 <br/>
 In ***Makefile***
   * Use `CFLAGS = -g ...` and `LDFLAGS = -g ...` for debug
-  * Use `CFLAGS = -O3 ...` and `LDFLAGS = -g ...` for release
+  * Use `CFLAGS = -O3 ...` and `LDFLAGS = -O3 ...` for release
 
 ### SVM Python Usage
 * Learning
