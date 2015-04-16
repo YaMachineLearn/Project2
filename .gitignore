@@ -1,0 +1,12 @@
+# python .pyc files
+*.pyc
+
+# training / testing files
+multi-example/*
+
+# executables
+svm_python_learn
+svm_python_classify
+
+# c object files
+*.o
