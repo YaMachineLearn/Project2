@@ -10,3 +10,7 @@ svm_python_classify
 
 # c object files
 *.o
+
+# training / testing data
+MLDS_HW1_RELEASE_v1/*
+MLDS_HW2_RELEASE_v1/*

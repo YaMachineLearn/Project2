@@ -1,4 +1,4 @@
-LABEL_MAP_FILENAME = '48_idx_chr.map'
+LABEL_MAP_FILENAME = '48_idx_chr.map_b'
 OUTPUT_PY_FILENAME = 'labelUtil.py'
 
 #def parseMap():
@@ -17,10 +17,10 @@ for i in xrange(len(mapFileList)):
     indexToChar[ int(mapFileList[i][1]) ] = mapFileList[i][2]
 
 with open(OUTPUT_PY_FILENAME, 'w') as outputFile:
-    outputFile.write('DICT_LABEL_TO_INDEX = ')
+    outputFile.write('DICT_LABEL_INDEX = ')
     outputFile.write(str(labelToIndex))
     outputFile.write('\n')
-    outputFile.write('DICT_INDEX_TO_CHAR = ')
+    outputFile.write('DICT_INDEX_CHAR = ')
     outputFile.write(str(indexToChar))
     outputFile.write('\n')
 
