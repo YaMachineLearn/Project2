@@ -44,14 +44,6 @@ def outputPartAAsCsv(obser, transition, TEST_CSV_FILE_NAME):
         for i in xrange(len(transition)):
             testCsvFile.write('faem0_si1392_' + str(i + len(obser)) + ',' + str(transition[i]) + '\n')
 
-def outputTestLabelAsCsv(testFrameNames, testLabels, TEST_CSV_FILE_NAME):
-    #testFrameNames = ['fadg0_si1279_1', 'fadg0_si1279_2', ...]
-    #testLabels = ['sil', 'aa', ...]
-    with open(TEST_CSV_FILE_NAME, 'w') as testCsvFile:
-        testCsvFile.write("Id,Prediction\n")
-        for i in xrange( len(testFrameNames) ):
-            testCsvFile.write(testFrameNames[i] + ',' + testLabels[i] + '\n')
-
 def trimFrameNames(frameNameList):
     #input: ['fadg0_si1279_1', 'fadg0_si1279_2', ..., 'fadg0_si1909_1', 'fadg0_si1909_2', ...]
     #output: ['fadg0_si1279', 'fadg0_si1909', ...]
@@ -72,9 +64,9 @@ def trimFrameNames(frameNameList):
             # so the third element is always '1'
     return trimmedNameList
 
-def outputCsvHW2(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
+def outputPartB(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
     with open(OUTPUT_CSV_FILE_NAME, 'w') as testCsvFile:
-        testCsvFile.write("id,phone_sequence\n")
+        testCsvFile.write("id,phone_sequence")
         for i in xrange(len(trimmedTestFrameNames)):
-            testCsvFile.write(trimmedTestFrameNames[i] + ',' + testLabelStrings[i] + '\n')
+            testCsvFile.write('\n' + trimmedTestFrameNames[i] + ',' + testLabelStrings[i])
 

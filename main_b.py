@@ -39,7 +39,7 @@ print '...costs ', t1 - t0, ' seconds\n'
 testLabelStrings = [''] * len(trimmedTestFrameNames)
 print 'Writing .csv file...'
 t0 = time.time()
-parse.outputCsvHW2(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME)
+parse.outputPartB(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME)
 t1 = time.time()
 print '...costs ', t1 - t0, ' seconds\n'
 
