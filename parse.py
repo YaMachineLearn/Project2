@@ -6,16 +6,18 @@ def parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME):
     #parse training features
     with open(TRAIN_FEATURE_FILENAME) as trainFeatFile:
         for line in trainFeatFile:
-            if line.rstrip():
-                lineList = line.rstrip().split(" ")
+            strippedLine = line.rstrip()
+            if strippedLine:   #not empty after strip
+                lineList = strippedLine.split(' ')
                 trainFrameNames.append( lineList.pop(0) )
                 trainFeats.append( [ float(ele) for ele in lineList ] )
 
     #parse training labels
     with open(TRAIN_LABEL_FILENAME) as trainLabelFile:
         for line in trainLabelFile:
-            if line.rstrip():
-                lineList = line.rstrip().split(",")
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(",")
                 trainLabels.append(lineList[1])
     
     return (trainFeats, trainLabels, trainFrameNames)
@@ -49,3 +51,30 @@ def outputTestLabelAsCsv(testFrameNames, testLabels, TEST_CSV_FILE_NAME):
         testCsvFile.write("Id,Prediction\n")
         for i in xrange( len(testFrameNames) ):
             testCsvFile.write(testFrameNames[i] + ',' + testLabels[i] + '\n')
+
+def trimFrameNames(frameNameList):
+    #input: ['fadg0_si1279_1', 'fadg0_si1279_2', ..., 'fadg0_si1909_1', 'fadg0_si1909_2', ...]
+    #output: ['fadg0_si1279', 'fadg0_si1909', ...]
+    #need to make sure the input has no empty string inside(in the end)
+    trimmedNameList = list()
+
+    prevSplitName = frameNameList[0].split('_') #should .strip()?
+    splitName = prevSplitName   #point to same list, not copy. doesn't matter in this case
+    trimmedNameList.append(splitName[0] + '_' + splitName[1])
+    
+    for frameName in frameNameList:
+        splitName = frameName.split('_')
+        if splitName[0] != prevSplitName[0] or splitName[1] != prevSplitName[1]:
+            trimmedNameList.append(splitName[0] + '_' + splitName[1])
+            prevSplitName = splitName
+            # prevSplitName is updated when the first two elements
+            # of prevSplitName and splitName are different.
+            # so the third element is always '1'
+    return trimmedNameList
+
+def outputCsvHW2(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
+    with open(OUTPUT_CSV_FILE_NAME, 'w') as testCsvFile:
+        testCsvFile.write("id,phone_sequence\n")
+        for i in xrange(len(trimmedTestFrameNames)):
+            testCsvFile.write(trimmedTestFrameNames[i] + ',' + testLabelStrings[i] + '\n')
+
