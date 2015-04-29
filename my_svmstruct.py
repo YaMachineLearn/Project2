@@ -15,11 +15,14 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    return [([1,0,0,1], [1,2]), ([0,1,1,0], [2,1]),
-            ([0,1,0,1], [2,2]), ([1,0,0,1], [1,2])]
+    return [([[3,2],[0,1]], [1,2]), ([[5,4],[1,0]], [2,1]),
+            ([[1,7],[0,1]], [2,2]), ([[8,2],[0,1]], [1,2])]
 
 def init_model(sample, sm, sparm):
-    sm.size_psi = len(sample[0][0])
+    sm.xDim = 2 #69
+    sm.labelTypes = 2 #48
+    sm.obsFeatDim = sm.xDim * sm.labelTypes
+    sm.size_psi = sm.obsFeatDim + sm.labelTypes * sm.labelTypes
 
 def init_constraints(sample, sm, sparm):
     import svmapi
@@ -37,12 +40,41 @@ def init_constraints(sample, sm, sparm):
 
 
 def classify_example(x, sm, sparm):
-    l = []
-    if x[0] == 1 : l.append(1)
-    else : l.append(2)
-    if x[2] == 1 : l.append(1)
-    else : l.append(2)
-    return l
+    w = [1,2,3,4,5,6,7,8]
+    lastPhone = [[None]] * sm.labelTypes
+    cost = [[sum([i*j for i,j in zip(x[0],w[sm.xDim*lab:sm.xDim*(lab+1)])])] for lab in xrange(sm.labelTypes)]
+    for lab in xrange(sm.labelTypes):
+        cost[lab].append([None] * (len(x)-1))
+    # for frameIndex = xrange(1, len(x)):
+    #     for lab in xrange(sm.labelTypes):
+    #         maxCostIndex = 0
+    #         maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+    #         for lastLab in xrange(1, sm.labelTypes):
+    #             temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+    #             if temp > maxCost:
+    #                 maxCostIndex = lastLab
+    #                 maxCost = temp
+    #         lastPhone[lab].append(maxCostIndex)
+    #         cost[lab][frameIndex] = maxCost
+
+    # maxCostIndex = 0
+    # maxCost = cost[0][len(x)-1]
+    # for lab in xrange(1, sm.labelTypes):
+    #     temp = cost[lab][len(x)-1]
+    #     if temp > maxCost:
+    #         maxCostIndex = lab
+    #         maxCost = temp
+    # yReversed = [maxCostIndex]
+    # for frameIndex in xrange(len(x)-1, 0, -1):
+    #     maxCostIndex = lastPhone[maxCostIndex][frameIndex]
+    #     yReversed.append(maxCostIndex)
+    #print 'w: ', sm.w[0:-1]
+    print 'x: ', x
+    print 'cost: ', cost
+    print 'lastPhone: ', lastPhone
+    # print 'y: ', yReversed[::-1]
+    #return yReversed[::-1]
+    return [1,2]
 
 def find_most_violated_constraint(x, y, sm, sparm):
     return [1,2]
