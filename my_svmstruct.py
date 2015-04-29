@@ -7,6 +7,8 @@
     5. classify_example
 """
 import svmapi
+import parse
+import labelUtil
 
 def parse_parameters(sparm):
     sparm.arbitrary_parameter = 'I am an arbitrary parameter!'
@@ -15,8 +17,28 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    return [([[3,2],[0,1]], [1,2]), ([[5,4],[1,0]], [2,1]),
-            ([[1,7],[0,1]], [2,2]), ([[8,2],[0,1]], [1,2])]
+    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
+    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
+    trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
+    trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
+    totalFrameNumber = len(trainFeats)
+    frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[0])
+    prevFrameName = frameName
+    utterance_x = [] # 2D array (M * 69), where M the number of frames in an utterance, input training frames' data for an utterance
+    utterance_y = [] # 1D vector (M), label indices for frames in an utterance
+    examples = [] # return examples [(utterance1_x, utterance1_y), (utterance2_x, utterance2_y), ..., (utteranceN_x, utteranceN_y)] where N is the number of total utterances
+    for i in range(totalFrameNumber):
+        frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[i])
+        if prevFrameName != frameName:
+            prevFrameName = frameName
+            examples.append((utterance_x, utterance_y))
+            utterance_x = []
+            utterance_y = []
+        utterance_x.append(trainFeats[i])
+        utterance_y.append(trainLabelIndices[i])
+    examples.append((utterance_x, utterance_y))
+
+    return examples
 
 def init_model(sample, sm, sparm):
     sm.xDim = 2 #69

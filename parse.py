@@ -1,3 +1,5 @@
+import re
+
 def parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME):
     trainFeats = []
     trainLabels = []
@@ -63,6 +65,11 @@ def trimFrameNames(frameNameList):
             # of prevSplitName and splitName are different.
             # so the third element is always '1'
     return trimmedNameList
+
+def getFrameNameAndNumber(frameName):
+    regex = re.compile(ur'(.+_.+)_(\d+)')
+    result = re.search(regex, frameName)
+    return (result.group(1), result.group(2))
 
 def outputPartB(trimmedTestFrameNames, testLabelStrings, OUTPUT_CSV_FILE_NAME):
     with open(OUTPUT_CSV_FILE_NAME, 'w') as testCsvFile:
