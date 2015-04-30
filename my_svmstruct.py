@@ -39,6 +39,8 @@ def read_examples(filename, sparm):
     examples.append((utterance_x, utterance_y))
 
     return examples
+    #return [([[3,2,5,1],[2,0,1,4],[5,2,4,0],[0,6,1,2]], [1,2,0,1]),
+    #        ([[1,4,1,2],[0,6,1,1],[1,2,2,3]], [2,2,1])]
 
 def init_model(sample, sm, sparm):
     sm.xDim = 2 #69
@@ -60,43 +62,42 @@ def init_constraints(sample, sm, sparm):
         constraints.append((lhs, 0))
     return constraints
 
-
 def classify_example(x, sm, sparm):
-    w = [1,2,3,4,5,6,7,8]
-    lastPhone = [[None]] * sm.labelTypes
+    # use 'w' just for testing
+    # 'w' should be replaced with sm.w later
+    w = [1,5,3,4,4,2,2,2,1,6,3,7,2,2,4,3,2,4,3,1,1]
+    lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
     cost = [[sum([i*j for i,j in zip(x[0],w[sm.xDim*lab:sm.xDim*(lab+1)])])] for lab in xrange(sm.labelTypes)]
     for lab in xrange(sm.labelTypes):
-        cost[lab].append([None] * (len(x)-1))
-    # for frameIndex = xrange(1, len(x)):
-    #     for lab in xrange(sm.labelTypes):
-    #         maxCostIndex = 0
-    #         maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
-    #         for lastLab in xrange(1, sm.labelTypes):
-    #             temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
-    #             if temp > maxCost:
-    #                 maxCostIndex = lastLab
-    #                 maxCost = temp
-    #         lastPhone[lab].append(maxCostIndex)
-    #         cost[lab][frameIndex] = maxCost
+        cost[lab].extend([None for i in xrange(len(x)-1)])
+    for frameIndex in xrange(1, len(x)):
+        for lab in xrange(sm.labelTypes):
+            maxCostIndex = 0
+            maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+            for lastLab in xrange(1, sm.labelTypes):
+                temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+                if temp > maxCost:
+                    maxCostIndex = lastLab
+                    maxCost = temp
+            lastPhone[lab][frameIndex] = maxCostIndex
+            cost[lab][frameIndex] = maxCost
 
-    # maxCostIndex = 0
-    # maxCost = cost[0][len(x)-1]
-    # for lab in xrange(1, sm.labelTypes):
-    #     temp = cost[lab][len(x)-1]
-    #     if temp > maxCost:
-    #         maxCostIndex = lab
-    #         maxCost = temp
-    # yReversed = [maxCostIndex]
-    # for frameIndex in xrange(len(x)-1, 0, -1):
-    #     maxCostIndex = lastPhone[maxCostIndex][frameIndex]
-    #     yReversed.append(maxCostIndex)
-    #print 'w: ', sm.w[0:-1]
+    maxCostIndex = 0
+    maxCost = cost[0][len(x)-1]
+    for lab in xrange(1, sm.labelTypes):
+        temp = cost[lab][len(x)-1]
+        if temp > maxCost:
+            maxCostIndex = lab
+            maxCost = temp
+    yReversed = [maxCostIndex]
+    for frameIndex in xrange(len(x)-1, 0, -1):
+        maxCostIndex = lastPhone[maxCostIndex][frameIndex]
+        yReversed.append(maxCostIndex)
     print 'x: ', x
     print 'cost: ', cost
     print 'lastPhone: ', lastPhone
-    # print 'y: ', yReversed[::-1]
-    #return yReversed[::-1]
-    return [1,2]
+    print 'y: ', yReversed[::-1]
+    return yReversed[::-1]
 
 def find_most_violated_constraint(x, y, sm, sparm):
     return [1,2]
