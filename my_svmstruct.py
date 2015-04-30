@@ -17,30 +17,30 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
-    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
-    trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
-    trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
-    totalFrameNumber = len(trainFeats)
-    frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[0])
-    prevFrameName = frameName
-    utterance_x = [] # 2D array (M * 69), where M the number of frames in an utterance, input training frames' data for an utterance
-    utterance_y = [] # 1D vector (M), label indices for frames in an utterance
-    examples = [] # return examples [(utterance1_x, utterance1_y), (utterance2_x, utterance2_y), ..., (utteranceN_x, utteranceN_y)] where N is the number of total utterances
-    for i in range(totalFrameNumber):
-        frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[i])
-        if prevFrameName != frameName:
-            prevFrameName = frameName
-            examples.append((utterance_x, utterance_y))
-            utterance_x = []
-            utterance_y = []
-        utterance_x.append(trainFeats[i])
-        utterance_y.append(trainLabelIndices[i])
-    examples.append((utterance_x, utterance_y))
+    # TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
+    # TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
+    # trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
+    # trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
+    # totalFrameNumber = len(trainFeats)
+    # frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[0])
+    # prevFrameName = frameName
+    # utterance_x = [] # 2D array (M * 69), where M the number of frames in an utterance, input training frames' data for an utterance
+    # utterance_y = [] # 1D vector (M), label indices for frames in an utterance
+    # examples = [] # return examples [(utterance1_x, utterance1_y), (utterance2_x, utterance2_y), ..., (utteranceN_x, utteranceN_y)] where N is the number of total utterances
+    # for i in range(totalFrameNumber):
+    #     frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[i])
+    #     if prevFrameName != frameName:
+    #         prevFrameName = frameName
+    #         examples.append((utterance_x, utterance_y))
+    #         utterance_x = []
+    #         utterance_y = []
+    #     utterance_x.append(trainFeats[i])
+    #     utterance_y.append(trainLabelIndices[i])
+    # examples.append((utterance_x, utterance_y))
 
-    return examples
-    #return [([[3,2,5,1],[2,0,1,4],[5,2,4,0],[0,6,1,2]], [1,2,0,1]),
-    #        ([[1,4,1,2],[0,6,1,1],[1,2,2,3]], [2,2,1])]
+    # return examples
+    return [([[3,2,5,1],[2,0,1,4],[5,2,4,0],[0,6,1,2]], [1,2,0,1]),
+           ([[1,4,1,2],[0,6,1,1],[1,2,2,3]], [2,2,1])]
 
 def init_model(sample, sm, sparm):
     sm.xDim = 2 #69
@@ -97,10 +97,45 @@ def classify_example(x, sm, sparm):
     print 'cost: ', cost
     print 'lastPhone: ', lastPhone
     print 'y: ', yReversed[::-1]
+    print 5 + (13 if 31 != 3 else 10)
     return yReversed[::-1]
 
 def find_most_violated_constraint(x, y, sm, sparm):
-    return [1,2]
+    # use 'w' just for testing
+    # 'w' should be replaced with sm.w later
+    w = [1,5,3,4,4,2,2,2,1,6,3,7,2,2,4,3,2,4,3,1,1]
+    lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
+    cost = [[sum([i*j for i,j in zip(x[0],w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y else 0)] for lab in xrange(sm.labelTypes)]
+    for lab in xrange(sm.labelTypes):
+        cost[lab].extend([None for i in xrange(len(x)-1)])
+    for frameIndex in xrange(1, len(x)):
+        for lab in xrange(sm.labelTypes):
+            maxCostIndex = 0
+            maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+            for lastLab in xrange(1, sm.labelTypes):
+                temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+                if temp > maxCost:
+                    maxCostIndex = lastLab
+                    maxCost = temp
+            lastPhone[lab][frameIndex] = maxCostIndex
+            cost[lab][frameIndex] = maxCost
+
+    maxCostIndex = 0
+    maxCost = cost[0][len(x)-1]
+    for lab in xrange(1, sm.labelTypes):
+        temp = cost[lab][len(x)-1]
+        if temp > maxCost:
+            maxCostIndex = lab
+            maxCost = temp
+    yReversed = [maxCostIndex]
+    for frameIndex in xrange(len(x)-1, 0, -1):
+        maxCostIndex = lastPhone[maxCostIndex][frameIndex]
+        yReversed.append(maxCostIndex)
+    print 'x: ', x
+    print 'cost: ', cost
+    print 'lastPhone: ', lastPhone
+    print 'ybar: ', yReversed[::-1]
+    return yReversed[::-1]    
 
 def find_most_violated_constraint_slack(x, y, sm, sparm):
     return find_most_violated_constraint(x, y, sm, sparm)
