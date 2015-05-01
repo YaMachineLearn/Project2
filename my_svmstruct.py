@@ -19,8 +19,8 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
-    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
+    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train_fbank_2000.ark"
+    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train_2000.lab"
     trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
     trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
     totalFrameNumber = len(trainFeats)
@@ -43,8 +43,8 @@ def read_examples(filename, sparm):
     return examples
 
 def init_model(sample, sm, sparm):
-    sm.xDim = 4 #69
-    sm.labelTypes = 3 #48
+    sm.xDim = 69
+    sm.labelTypes = 48
     sm.obsFeatDim = sm.xDim * sm.labelTypes
     sm.size_psi = sm.obsFeatDim + sm.labelTypes * sm.labelTypes
 
