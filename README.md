@@ -23,7 +23,6 @@ For example:
 For example:
 <br/>
 ```./svm_python_classify --m multiclass multi-example/test.dat multi-example/train.model multi-example/result.out```
-
 ```./svm_python_classify --m my_svmstruct dummy output/train.model output/result.out```
 
 ### Reference
