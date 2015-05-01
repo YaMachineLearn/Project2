@@ -8,6 +8,7 @@ DICT_INDEX_CHAR = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h
 DICT_INDEX48_INDEX39 = {0: 0, 1: 1, 2: 2, 3: 0, 4: 4, 5: 2, 6: 6, 7: 7, 8: 8, 9: 37, 10: 10, 11: 11, 12: 12, 13: 13, 14: 27, 15: 29, 16: 37, 17: 17, 18: 18, 19: 19, 20: 20, 21: 21, 22: 22, 23: 22, 24: 24, 25: 25, 26: 26, 27: 27, 28: 28, 29: 29, 30: 30, 31: 31, 32: 32, 33: 33, 34: 34, 35: 35, 36: 36, 37: 37, 38: 38, 39: 39, 40: 40, 41: 41, 42: 42, 43: 37, 44: 44, 45: 45, 46: 46, 47: 36}
 
 LABEL_COUNT = 48
+SIL_INDEX = DICT_LABEL_INDEX['sil']
 
 def labelsToIndices(labelList):
     #labelList ex: ['aa', 'sil', 'ch']
@@ -27,8 +28,42 @@ def indices48Toindices39(indexList):
     indices39 = [ DICT_INDEX48_INDEX39[index] for index in indexList ]
     return indices39
 
+def trimIndices(indexList):
+    #input: [37, 37, 1, 1, 1, 37, 37, 8, 8, 37, 37]
+    #output: [1, 37, 8]
+    #input will not be modified.
+    trimmedIndexList = list()
+
+    if not indexList:   #if empty
+        return trimmedIndexList
+
+    """ Remove the repeated elements """
+    prevElement = indexList[0]
+    trimmedIndexList.append(prevElement)
+    for element in indexList:
+        if element != prevElement:
+            trimmedIndexList.append(element)
+            prevElement = element
+
+    """ Remove <sil> in the endpoints """
+    if trimmedIndexList[0] == SIL_INDEX:
+        trimmedIndexList.pop(0)
+    if trimmedIndexList[-1] == SIL_INDEX:
+        trimmedIndexList.pop(-1)
+
+    return trimmedIndexList
+
+
 
 if __name__ == '__main__':
     print labelsToIndices(['aa', 'sil', 'ch'])
     print indicesToChars([0, 37, 8])
     print indices48Toindices39([0, 1, 2, 3, 4, 5])
+
+    print
+    labels = ['sil', 'sil', 'sil', 'sil', 'ch', 'ch', 'sil', 'sil', 'sil', 'aa', 'aa', 'aa', 'sil', 'sil']
+    print labels
+    indices = labelsToIndices(labels)
+    print indices
+    trimmedIndices = trimIndices(indices)
+    print trimmedIndices
