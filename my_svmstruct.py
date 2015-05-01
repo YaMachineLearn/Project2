@@ -9,6 +9,7 @@
 import svmapi
 import parse
 import labelUtil
+import psiUtil
 import numpy
 from operator import add
 
@@ -64,15 +65,15 @@ def classify_example(x, sm, sparm):
     # 'w' should be replaced with sm.w later
     # w = [2,1,6,3,7,2,1,5,3,4,4,2,2,4,3,2,2,4,3,1,1]
     lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
-    cost = [[sum([i * j for i,j in zip(x[0], w[sm.xDim * lab:sm.xDim * (lab + 1)])])] for lab in xrange(sm.labelTypes)]
+    cost = [[sum([i * j for i,j in zip(x[0], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])] for lab in xrange(sm.labelTypes)]
     for lab in xrange(sm.labelTypes):
         cost[lab].extend([None for i in xrange(len(x) - 1)])
     for frameIndex in xrange(1, len(x)):
         for lab in xrange(sm.labelTypes):
             maxCostIndex = 0
-            maxCost = cost[0][frameIndex - 1] + w[sm.obsFeatDim + lab] + sum([i * j for i, j in zip(x[frameIndex], w[sm.xDim * lab:sm.xDim * (lab + 1)])])
+            maxCost = cost[0][frameIndex - 1] + sm.w[sm.obsFeatDim + lab] + sum([i * j for i, j in zip(x[frameIndex], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])
             for lastLab in xrange(1, sm.labelTypes):
-                temp = cost[lastLab][frameIndex - 1] + w[sm.obsFeatDim + lastLab * sm.labelTypes + lab] + sum([i * j for i, j in zip(x[frameIndex], w[sm.xDim * lab:sm.xDim * (lab + 1)])])
+                temp = cost[lastLab][frameIndex - 1] + sm.w[sm.obsFeatDim + lastLab * sm.labelTypes + lab] + sum([i * j for i, j in zip(x[frameIndex], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])
                 if temp > maxCost:
                     maxCostIndex = lastLab
                     maxCost = temp
@@ -140,7 +141,7 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
     return find_most_violated_constraint(x, y, sm, sparm)
 
 def psi(x, y, sm, sparm):
-    return genObsMat(x, y).reshape(-1,).tolist() + genTrsMat(y).reshape(-1,).tolist()
+    return psiUtil.genObsMat(x, y).reshape(-1,).tolist() + psiUtil.genTrsMat(y).reshape(-1,).tolist()
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
