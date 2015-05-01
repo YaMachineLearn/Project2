@@ -9,6 +9,7 @@
 import svmapi
 import parse
 import labelUtil
+import numpy
 
 def parse_parameters(sparm):
     sparm.arbitrary_parameter = 'I am an arbitrary parameter!'
@@ -17,30 +18,28 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    # TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
-    # TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
-    # trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
-    # trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
-    # totalFrameNumber = len(trainFeats)
-    # frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[0])
-    # prevFrameName = frameName
-    # utterance_x = [] # 2D array (M * 69), where M the number of frames in an utterance, input training frames' data for an utterance
-    # utterance_y = [] # 1D vector (M), label indices for frames in an utterance
-    # examples = [] # return examples [(utterance1_x, utterance1_y), (utterance2_x, utterance2_y), ..., (utteranceN_x, utteranceN_y)] where N is the number of total utterances
-    # for i in range(totalFrameNumber):
-    #     frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[i])
-    #     if prevFrameName != frameName:
-    #         prevFrameName = frameName
-    #         examples.append((utterance_x, utterance_y))
-    #         utterance_x = []
-    #         utterance_y = []
-    #     utterance_x.append(trainFeats[i])
-    #     utterance_y.append(trainLabelIndices[i])
-    # examples.append((utterance_x, utterance_y))
+    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train.ark"
+    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train.lab"
+    trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
+    trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
+    totalFrameNumber = len(trainFeats)
+    frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[0])
+    prevFrameName = frameName
+    utterance_x = [] # 2D array (M * 69), where M the number of frames in an utterance, input training frames' data for an utterance
+    utterance_y = [] # 1D vector (M), label indices for frames in an utterance
+    examples = [] # return examples [(utterance1_x, utterance1_y), (utterance2_x, utterance2_y), ..., (utteranceN_x, utteranceN_y)] where N is the number of total utterances
+    for i in xrange(totalFrameNumber):
+        frameName, frameNumber = parse.getFrameNameAndNumber(trainFrameNames[i])
+        if prevFrameName != frameName:
+            prevFrameName = frameName
+            examples.append((utterance_x, utterance_y))
+            utterance_x = []
+            utterance_y = []
+        utterance_x.append(trainFeats[i])
+        utterance_y.append(trainLabelIndices[i])
+    examples.append((utterance_x, utterance_y))
 
-    # return examples
-    return [([[3,2,5,1],[2,0,1,4],[5,2,4,0],[0,6,1,2]], [1,2,0,1]),
-           ([[1,4,1,2],[0,6,1,1],[1,2,2,3]], [2,2,1])]
+    return examples
 
 def init_model(sample, sm, sparm):
     sm.xDim = 2 #69
@@ -144,7 +143,19 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
     return find_most_violated_constraint(x, y, sm, sparm)
 
 def psi(x, y, sm, sparm):
-    return svmapi.Sparse([1,3,2,1])
+    # observation part
+    obsMat = [[0.] * len(x)] * labelUtil.LABEL_COUNT
+    for i in xrange(len(x)):
+        obsMat[y[i]] = map(add, obsMat[y[i]], x[i])
+
+    # transition part
+    trsMat = [[0.] * labelUtil.LABEL_COUNT] * labelUtil.LABEL_COUNT
+    for i in xrange(len(y) - 1):
+        row = y[i]
+        col = y[i + 1]
+        trsMat[row][col] += 1
+
+    return numpy.array(obsMat).reshape(-1,).tolist() + numpy.array(trsMat).reshape(-1,).tolist()
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
