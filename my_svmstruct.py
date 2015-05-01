@@ -10,6 +10,7 @@ import svmapi
 import parse
 import labelUtil
 import numpy
+from operator import add
 
 def parse_parameters(sparm):
     sparm.arbitrary_parameter = 'I am an arbitrary parameter!'
@@ -144,22 +145,25 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
 
 def psi(x, y, sm, sparm):
     # observation part
-    obsMat = [[0.] * len(x[0])] * labelUtil.LABEL_COUNT
+    obsMat = numpy.array([[0.] * len(x[0])] * labelUtil.LABEL_COUNT)
     for i in xrange(len(x)):
         obsMat[y[i]] = map(add, obsMat[y[i]], x[i])
 
     # transition part
-    trsMat = [[0.] * labelUtil.LABEL_COUNT] * labelUtil.LABEL_COUNT
+    trsMat = numpy.array([[0.] * labelUtil.LABEL_COUNT] * labelUtil.LABEL_COUNT)
     for i in xrange(len(y) - 1):
         row = y[i]
         col = y[i + 1]
         trsMat[row][col] += 1
 
-    return numpy.array(obsMat).reshape(-1,).tolist() + numpy.array(trsMat).reshape(-1,).tolist()
+    return obsMat.reshape(-1,).tolist() + trsMat.reshape(-1,).tolist()
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
-    return 1
+    err = 0
+    for i in xrange(len(y)):
+        if y[i] != ybar[i]: err += 1
+    return err
 
 def print_iteration_stats(ceps, cached_constraint, sample, sm,
                           cset, alpha, sparm):
