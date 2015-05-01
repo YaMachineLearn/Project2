@@ -15,6 +15,7 @@ In ***Makefile***
 For example:
 <br/>
 ```./svm_python_learn --m multiclass -c 0.01 multi-example/train.dat multi-example/train.model```
+<br/>
 ```./svm_python_learn --m my_svmstruct -c 0.01 dummy output/train.model```
 * Training
 <br/>
@@ -23,6 +24,7 @@ For example:
 For example:
 <br/>
 ```./svm_python_classify --m multiclass multi-example/test.dat multi-example/train.model multi-example/result.out```
+<br/>
 ```./svm_python_classify --m my_svmstruct dummy output/train.model output/result.out```
 
 ### Reference
