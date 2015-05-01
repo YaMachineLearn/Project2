@@ -28,6 +28,13 @@ def indices48Toindices39(indexList):
     indices39 = [ DICT_INDEX48_INDEX39[index] for index in indexList ]
     return indices39
 
+def indicesToCharString(indexList):
+    #input: [0, 37, 8]
+    #output: 'aLi'
+    charList = [ DICT_INDEX_CHAR[index] for index in indexList ]
+    charString = ''.join(charList)
+    return charString
+
 def trimIndices(indexList):
     #input: [37, 37, 1, 1, 1, 37, 37, 8, 8, 37, 37]
     #output: [1, 37, 8]
@@ -59,11 +66,16 @@ if __name__ == '__main__':
     print labelsToIndices(['aa', 'sil', 'ch'])
     print indicesToChars([0, 37, 8])
     print indices48Toindices39([0, 1, 2, 3, 4, 5])
+    print indicesToCharString([0, 37, 8])
 
     print
-    labels = ['sil', 'sil', 'sil', 'sil', 'ch', 'ch', 'sil', 'sil', 'sil', 'aa', 'aa', 'aa', 'sil', 'sil']
+    labels = ['sil', 'sil', 'sil', 'sil', 'ch', 'ch', 'sil', 'sil', 'sil', 'aa', 'ao', 'aa', 'sil', 'sil']
     print labels
-    indices = labelsToIndices(labels)
-    print indices
-    trimmedIndices = trimIndices(indices)
+    indices48 = labelsToIndices(labels)
+    print indices48
+    indices39 = indices48Toindices39(indices48)
+    print indices39
+    trimmedIndices = trimIndices(indices39)
     print trimmedIndices
+    charString = indicesToCharString(trimmedIndices)
+    print charString
