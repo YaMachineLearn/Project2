@@ -144,7 +144,7 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
 
 def psi(x, y, sm, sparm):
     # observation part
-    obsMat = [[0.] * len(x)] * labelUtil.LABEL_COUNT
+    obsMat = [[0.] * len(x[0])] * labelUtil.LABEL_COUNT
     for i in xrange(len(x)):
         obsMat[y[i]] = map(add, obsMat[y[i]], x[i])
 
