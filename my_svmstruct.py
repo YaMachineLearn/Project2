@@ -20,8 +20,8 @@ def parse_parameters_classify(attribute, value):
     print 'Got a custom command line argument %s %s' % (attribute, value)
 
 def read_examples(filename, sparm):
-    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train_fbank_2000.ark"
-    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train_2000.lab"
+    TRAIN_FEATURE_FILENAME  = "MLDS_HW2_RELEASE_v1/fbank/train_fbank_100.ark"
+    TRAIN_LABEL_FILENAME    = "MLDS_HW2_RELEASE_v1/label/train_100.lab"
     trainFeats, trainLabels, trainFrameNames = parse.parseTrainData(TRAIN_FEATURE_FILENAME, TRAIN_LABEL_FILENAME)
     trainLabelIndices = [labelUtil.DICT_LABEL_INDEX[label] for label in trainLabels]
     totalFrameNumber = len(trainFeats)
@@ -73,7 +73,8 @@ def classify_example(x, sm, sparm):
             maxCostIndex = 0
             maxCost = cost[0][frameIndex - 1] + sm.w[sm.obsFeatDim + lab] + sum([i * j for i, j in zip(x[frameIndex], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])
             for lastLab in xrange(1, sm.labelTypes):
-                temp = cost[lastLab][frameIndex - 1] + sm.w[sm.obsFeatDim + lastLab * sm.labelTypes + lab] + sum([i * j for i, j in zip(x[frameIndex], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])
+                product = sum([i * j for i, j in zip(x[frameIndex], sm.w[sm.xDim * lab:sm.xDim * (lab + 1)])])
+                temp = cost[lastLab][frameIndex - 1] + sm.w[sm.obsFeatDim + lastLab * sm.labelTypes + lab] + product
                 if temp > maxCost:
                     maxCostIndex = lastLab
                     maxCost = temp
@@ -110,7 +111,8 @@ def find_most_violated_constraint(x, y, sm, sparm):
             maxCostIndex = 0
             maxCost = cost[0][frameIndex-1] + sm.w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y[frameIndex] else 0)
             for lastLab in xrange(1, sm.labelTypes):
-                temp = cost[lastLab][frameIndex-1] + sm.w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y[frameIndex] else 0)
+                product = sum([i*j for i,j in zip(x[frameIndex],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])])
+                temp = cost[lastLab][frameIndex-1] + sm.w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + product + (1 if lab != y[frameIndex] else 0)
                 if temp > maxCost:
                     maxCostIndex = lastLab
                     maxCost = temp
@@ -141,7 +143,7 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
     return find_most_violated_constraint(x, y, sm, sparm)
 
 def psi(x, y, sm, sparm):
-    return psiUtil.genObsMat(x, y).reshape(-1,).tolist() + psiUtil.genTrsMat(y).reshape(-1,).tolist()
+    return svmapi.Sparse(psiUtil.genObsMat(x, y).reshape(-1,).tolist() + psiUtil.genTrsMat(y).reshape(-1,).tolist())
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
