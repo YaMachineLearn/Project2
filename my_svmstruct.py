@@ -49,15 +49,13 @@ def init_model(sample, sm, sparm):
     sm.size_psi = sm.obsFeatDim + sm.labelTypes * sm.labelTypes
 
 def init_constraints(sample, sm, sparm):
-    import svmapi
-
     if True:
         c, d = svmapi.Sparse, svmapi.Document
         return [(d([c([(1, 1)])], slackid = len(sample) + 1), 1), (d([c([0, 0, 0, 1])], slackid = len(sample) + 1),.2)]
     constraints = []
     for i in xrange(sm.size_psi):
         sparse = svmapi.Sparse([(i,1)])
-        lhs = svmapi.Document([sparse], costfactor=1, slackid=i+1+len(sample))
+        lhs = svmapi.Document([sparse], costfactor = 1, slackid = i + 1 + len(sample))
         constraints.append((lhs, 0))
     return constraints
 
@@ -66,15 +64,15 @@ def classify_example(x, sm, sparm):
     # 'w' should be replaced with sm.w later
     w = [1,5,3,4,4,2,2,2,1,6,3,7,2,2,4,3,2,4,3,1,1]
     lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
-    cost = [[sum([i*j for i,j in zip(x[0],w[sm.xDim*lab:sm.xDim*(lab+1)])])] for lab in xrange(sm.labelTypes)]
+    cost = [[sum([i * j for i,j in zip(x[0], w[sm.xDim * lab:sm.xDim * (lab + 1)])])] for lab in xrange(sm.labelTypes)]
     for lab in xrange(sm.labelTypes):
-        cost[lab].extend([None for i in xrange(len(x)-1)])
+        cost[lab].extend([None for i in xrange(len(x) - 1)])
     for frameIndex in xrange(1, len(x)):
         for lab in xrange(sm.labelTypes):
             maxCostIndex = 0
-            maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+            maxCost = cost[0][frameIndex - 1] + w[sm.obsFeatDim + lab] + sum([i * j for i, j in zip(x[frameIndex], w[sm.xDim * lab:sm.xDim * (lab + 1)])])
             for lastLab in xrange(1, sm.labelTypes):
-                temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+                temp = cost[lastLab][frameIndex - 1] + w[sm.obsFeatDim + lastLab * sm.labelTypes + lab] + sum([i * j for i, j in zip(x[frameIndex], w[sm.xDim * lab:sm.xDim * (lab + 1)])])
                 if temp > maxCost:
                     maxCostIndex = lastLab
                     maxCost = temp
@@ -143,19 +141,7 @@ def find_most_violated_constraint_margin(x, y, sm, sparm):
     return find_most_violated_constraint(x, y, sm, sparm)
 
 def psi(x, y, sm, sparm):
-    # observation part
-    obsMat = numpy.array([[0.] * len(x[0])] * labelUtil.LABEL_COUNT)
-    for i in xrange(len(x)):
-        obsMat[y[i]] = map(add, obsMat[y[i]], x[i])
-
-    # transition part
-    trsMat = numpy.array([[0.] * labelUtil.LABEL_COUNT] * labelUtil.LABEL_COUNT)
-    for i in xrange(len(y) - 1):
-        row = y[i]
-        col = y[i + 1]
-        trsMat[row][col] += 1
-
-    return svmapi.Sparse(obsMat.reshape(-1,).tolist() + trsMat.reshape(-1,).tolist())
+    return genObsMat(x, y).reshape(-1,).tolist() + genTrsMat(y).reshape(-1,).tolist()
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
@@ -171,7 +157,7 @@ def print_learning_stats(sample, sm, cset, alpha, sparm):
     print 'Model learned:',
     print '[',', '.join(['%g'%i for i in sm.w]),']'
     print 'Losses:',
-    print [loss(y, classify_example(x, sm, sparm), sparm) for x,y in sample]
+    print [loss(y, classify_example(x, sm, sparm), sparm) for x, y in sample]
 
 def print_testing_stats(sample, sm, sparm, teststats):
     print teststats

@@ -1,10 +1,11 @@
 import labelUtil
+import numpy
 from operator import add
 
 def genObsMat(trainFeats, trainLabelIndices):
     colNum = len(trainFeats[0])
     rowNum = labelUtil.LABEL_COUNT
-    obsMat = [[0.] * colNum] * rowNum
+    obsMat = numpy.array([[0.] * colNum] * rowNum)
     for i in xrange(len(trainFeats)):
         labelIndex = trainLabelIndices[i]
         obsMat[labelIndex] = map(add, obsMat[labelIndex], trainFeats[i]) #faster: 6.56s
@@ -15,7 +16,7 @@ def genObsMat(trainFeats, trainLabelIndices):
 def genTrsMat(trainLabelIndices):
     colNum = labelUtil.LABEL_COUNT
     rowNum = labelUtil.LABEL_COUNT
-    trsMat = [[0.] * colNum] * rowNum
+    trsMat = numpy.array([[0.] * colNum] * rowNum)
     for i in xrange( len(trainLabelIndices)-1 ):
         row = trainLabelIndices[i]
         col = trainLabelIndices[i + 1]
