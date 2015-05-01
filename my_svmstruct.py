@@ -53,8 +53,7 @@ def init_constraints(sample, sm, sparm):
 
     if True:
         c, d = svmapi.Sparse, svmapi.Document
-        return [(d([c([(1,1)])],slackid=len(sample)+1),   1),
-                (d([c([0,0,0,1])],slackid=len(sample)+1),.2)]
+        return [(d([c([(1, 1)])], slackid = len(sample) + 1), 1), (d([c([0, 0, 0, 1])], slackid = len(sample) + 1),.2)]
     constraints = []
     for i in xrange(sm.size_psi):
         sparse = svmapi.Sparse([(i,1)])
@@ -156,7 +155,7 @@ def psi(x, y, sm, sparm):
         col = y[i + 1]
         trsMat[row][col] += 1
 
-    return obsMat.reshape(-1,).tolist() + trsMat.reshape(-1,).tolist()
+    return svmapi.Sparse(obsMat.reshape(-1,).tolist() + trsMat.reshape(-1,).tolist())
 
 def loss(y, ybar, sparm):
     if y == ybar: return 0
@@ -165,8 +164,7 @@ def loss(y, ybar, sparm):
         if y[i] != ybar[i]: err += 1
     return err
 
-def print_iteration_stats(ceps, cached_constraint, sample, sm,
-                          cset, alpha, sparm):
+def print_iteration_stats(ceps, cached_constraint, sample, sm, cset, alpha, sparm):
     print
 
 def print_learning_stats(sample, sm, cset, alpha, sparm):
