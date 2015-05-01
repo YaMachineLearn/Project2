@@ -43,8 +43,8 @@ def read_examples(filename, sparm):
     return examples
 
 def init_model(sample, sm, sparm):
-    sm.xDim = 2 #69
-    sm.labelTypes = 2 #48
+    sm.xDim = 4 #69
+    sm.labelTypes = 3 #48
     sm.obsFeatDim = sm.xDim * sm.labelTypes
     sm.size_psi = sm.obsFeatDim + sm.labelTypes * sm.labelTypes
 
@@ -62,7 +62,7 @@ def init_constraints(sample, sm, sparm):
 def classify_example(x, sm, sparm):
     # use 'w' just for testing
     # 'w' should be replaced with sm.w later
-    w = [1,5,3,4,4,2,2,2,1,6,3,7,2,2,4,3,2,4,3,1,1]
+    # w = [2,1,6,3,7,2,1,5,3,4,4,2,2,4,3,2,2,4,3,1,1]
     lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
     cost = [[sum([i * j for i,j in zip(x[0], w[sm.xDim * lab:sm.xDim * (lab + 1)])])] for lab in xrange(sm.labelTypes)]
     for lab in xrange(sm.labelTypes):
@@ -90,27 +90,26 @@ def classify_example(x, sm, sparm):
     for frameIndex in xrange(len(x)-1, 0, -1):
         maxCostIndex = lastPhone[maxCostIndex][frameIndex]
         yReversed.append(maxCostIndex)
-    print 'x: ', x
-    print 'cost: ', cost
-    print 'lastPhone: ', lastPhone
-    print 'y: ', yReversed[::-1]
-    print 5 + (13 if 31 != 3 else 10)
+    # print 'x: ', x
+    # print 'cost: ', cost
+    # print 'lastPhone: ', lastPhone
+    # print 'y: ', yReversed[::-1]
     return yReversed[::-1]
 
 def find_most_violated_constraint(x, y, sm, sparm):
     # use 'w' just for testing
     # 'w' should be replaced with sm.w later
-    w = [1,5,3,4,4,2,2,2,1,6,3,7,2,2,4,3,2,4,3,1,1]
+    # w = [2,1,6,3,7,2,1,5,3,4,4,2,2,4,3,2,2,4,3,1,1]
     lastPhone = [[None for i in xrange(len(x))] for j in xrange(sm.labelTypes)]
-    cost = [[sum([i*j for i,j in zip(x[0],w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y else 0)] for lab in xrange(sm.labelTypes)]
+    cost = [[sum([i*j for i,j in zip(x[0],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y[0] else 0)] for lab in xrange(sm.labelTypes)]
     for lab in xrange(sm.labelTypes):
         cost[lab].extend([None for i in xrange(len(x)-1)])
     for frameIndex in xrange(1, len(x)):
         for lab in xrange(sm.labelTypes):
             maxCostIndex = 0
-            maxCost = cost[0][frameIndex-1] + w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+            maxCost = cost[0][frameIndex-1] + sm.w[sm.obsFeatDim + lab] + sum([i*j for i,j in zip(x[frameIndex],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y[frameIndex] else 0)
             for lastLab in xrange(1, sm.labelTypes):
-                temp = cost[lastLab][frameIndex-1] + w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],w[sm.xDim*lab:sm.xDim*(lab+1)])])
+                temp = cost[lastLab][frameIndex-1] + sm.w[sm.obsFeatDim + lastLab*sm.labelTypes + lab] + sum([i*j for i,j in zip(x[frameIndex],sm.w[sm.xDim*lab:sm.xDim*(lab+1)])]) + (1 if lab != y[frameIndex] else 0)
                 if temp > maxCost:
                     maxCostIndex = lastLab
                     maxCost = temp
@@ -128,10 +127,10 @@ def find_most_violated_constraint(x, y, sm, sparm):
     for frameIndex in xrange(len(x)-1, 0, -1):
         maxCostIndex = lastPhone[maxCostIndex][frameIndex]
         yReversed.append(maxCostIndex)
-    print 'x: ', x
-    print 'cost: ', cost
-    print 'lastPhone: ', lastPhone
-    print 'ybar: ', yReversed[::-1]
+    # print 'x: ', x
+    # print 'cost: ', cost
+    # print 'lastPhone: ', lastPhone
+    # print 'ybar: ', yReversed[::-1]
     return yReversed[::-1]    
 
 def find_most_violated_constraint_slack(x, y, sm, sparm):
