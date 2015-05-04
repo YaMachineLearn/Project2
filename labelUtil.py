@@ -60,7 +60,25 @@ def trimIndices(indexList):
 
     return trimmedIndexList
 
+def smoothLabels(indexList, windowSize=5):
+    if windowSize < 1:
+        print "smoothLabels ereror: windowSize is smaller than 1."
+        return None
+    if len(indexList) <= windowSize:
+        print "smoothLabels ereror: length of indexList is smaller than or equal to windowSize."
+        return None
 
+    smoothedLabelList = list()
+
+    for i in xrange( len(indexList) - windowSize + 1 ):
+        smoothedLabelList.append( most_common( indexList[i:i+windowSize] ) )
+
+    return smoothedLabelList
+
+
+def most_common(lst):
+    #find most frequently appeared element
+    return max(lst, key=lst.count)
 
 if __name__ == '__main__':
     print labelsToIndices(['aa', 'sil', 'ch'])
@@ -79,3 +97,5 @@ if __name__ == '__main__':
     print trimmedIndices
     charString = indicesToCharString(trimmedIndices)
     print charString
+
+    print smoothLabels( [1,1,2,2,2,5,2,2,3,3,3,6,6,3,3,3,8,8,8], 3 )
