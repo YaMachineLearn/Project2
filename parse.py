@@ -31,12 +31,28 @@ def parseTestData(TEST_FEATURE_FILENAME):
     #parse testing features
     with open(TEST_FEATURE_FILENAME) as testFeatFile:
         for line in testFeatFile:
-            if line.rstrip():
-                lineList = line.rstrip().split(" ")
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(" ")
                 testFrameNames.append( lineList.pop(0) )
                 testFeats.append( [ float(ele) for ele in lineList ] )
     
     return (testFeats, testFrameNames)
+
+def parseHw1Csv(CSV_FILENAME):
+    frameNames = list()
+    labels = list()
+
+    with open(CSV_FILENAME) as csvFile:
+        csvFile.readline()
+        for line in csvFile:
+            strippedLine = line.rstrip()
+            if strippedLine:
+                lineList = strippedLine.split(",")
+                frameNames.append(lineList[0])
+                labels.append(lineList[1])
+
+    return (frameNames, labels)
 
 def outputPartAAsCsv(obser, transition, TEST_CSV_FILE_NAME):
     with open(TEST_CSV_FILE_NAME, 'w') as testCsvFile:
