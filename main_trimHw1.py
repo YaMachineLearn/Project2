@@ -4,7 +4,7 @@ import labelUtil
 CSV_FILENAME = "retired/TEST_ER378_CO0.51645_HL128-3_EP91_LR0.04_BS256.csv"
 OUTPUT_CSV_FILENAME = "output/trimmedHW1_smooth_5_4.csv"
 
-SMOOTH_TIMES = 4
+SMOOTH_TIMES = 10
 SMOOTH_WINDOW_SIZE = 5
 
 OUTPUT_CSV_FILENAME = "output/trimmedHW1_smooth_windowSize" + str(SMOOTH_WINDOW_SIZE) + "_times" + str(SMOOTH_TIMES) + ".csv"
@@ -39,10 +39,11 @@ utterLabelsList.append( labelIndices39[utterBeginFrameIndex:] )    #for the last
 
 """ smooth labels """
 for i in xrange(SMOOTH_TIMES):     #smooth n times
-    originalUtterLabelsList = utterLabelsList
-    utterLabelsList = list()
-    for labels in originalUtterLabelsList:
-        utterLabelsList.append( labelUtil.smoothLabels(labels, SMOOTH_WINDOW_SIZE) )
+    utterLabelsList = [ labelUtil.smoothLabels(labels, SMOOTH_WINDOW_SIZE) for labels in utterLabelsList ]
+    #originalUtterLabelsList = utterLabelsList
+    #utterLabelsList = list()
+    #for labels in originalUtterLabelsList:
+    #    utterLabelsList.append( labelUtil.smoothLabels(labels, SMOOTH_WINDOW_SIZE) )
 
 """ convert label lists to character strings """
 utterCharStringList = list()
